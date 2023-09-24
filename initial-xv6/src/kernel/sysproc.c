@@ -36,6 +36,23 @@ sys_wait(void)
 }
 
 uint64
+sys_waitx(void)
+{
+  uint64 addr, addr1, addr2;
+  uint wtime, rtime;
+  argaddr(0, &addr);
+  argaddr(1, &addr1); // user virtual memory
+  argaddr(2, &addr2);
+  int ret = waitx(addr, &wtime, &rtime);
+  struct proc *p = myproc();
+  if (copyout(p->pagetable, addr1, (char *)&wtime, sizeof(int)) < 0)
+    return -1;
+  if (copyout(p->pagetable, addr2, (char *)&rtime, sizeof(int)) < 0)
+    return -1;
+  return ret;
+}
+
+uint64
 sys_sbrk(void)
 {
   uint64 addr;
@@ -92,19 +109,64 @@ sys_uptime(void)
   return xticks;
 }
 
-uint64
-sys_waitx(void)
+// system trace
+uint64 sys_trace(void)
 {
-  uint64 addr, addr1, addr2;
-  uint wtime, rtime;
-  argaddr(0, &addr);
-  argaddr(1, &addr1); // user virtual memory
-  argaddr(2, &addr2);
-  int ret = waitx(addr, &wtime, &rtime);
+  int tmask;
+  argint(0, &tmask);
+  myproc()->tmask = tmask;
+  return 0;
+}
+
+// system setticket
+int sys_settickets(void)
+{
+  int number;
+  argint(0, &number);
+  acquire(&(myproc())->lock);
+  myproc()->tickets = number;
+  release(&(myproc())->lock);
+  return 0;
+}
+
+// sigalarm
+uint64 sys_sigalarm(void)
+{
+  int interval;
+  uint64 fn;
+  argint(0, &interval);
+  argaddr(1, &fn);
+
   struct proc *p = myproc();
-  if (copyout(p->pagetable, addr1, (char *)&wtime, sizeof(int)) < 0)
-    return -1;
-  if (copyout(p->pagetable, addr2, (char *)&rtime, sizeof(int)) < 0)
-    return -1;
-  return ret;
+
+  p->sigalarm_status = 0;
+  p->interval = interval;
+  p->now_ticks = 0;
+  p->handler = fn;
+
+  return 0;
+}
+
+uint64 sys_sigreturn(void)
+{
+  struct proc *p = myproc();
+
+  // Restore Kernel Values
+  memmove(p->trapframe, p->alarm_trapframe, PGSIZE);
+  kfree(p->alarm_trapframe);
+
+  p->sigalarm_status = 0;
+  p->alarm_trapframe = 0;
+  p->now_ticks = 0;
+  usertrapret();
+  return 0;
+}
+
+uint64 sys_setpriority(void)
+{
+  int number, piid;
+  argint(0, &number);
+  argint(1, &piid);
+  setpriority(number, piid);
+  return 0;
 }

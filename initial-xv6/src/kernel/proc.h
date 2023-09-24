@@ -1,3 +1,5 @@
+#ifndef __proc
+#define __proc
 // Saved registers for kernel context switches.
 struct context
 {
@@ -116,9 +118,41 @@ struct proc
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  uint rtime;                  // How long the process ran for
-  uint ctime;                  // When was the process created
-  uint etime;                  // When did the process exited
+
+  uint rtime; // How long the process ran for
+  uint ctime; // When was the process created
+  uint etime; // When did the process exited
+
+  uint tmask;
+  uint tickets;
+  uint number_of_times_scheduled;
+  uint static_priority;
+  uint sleep_start;
+  uint reset_niceness;
+  uint sleeping_ticks;
+  uint running_ticks;
+  uint level;
+  uint in_queue;
+  uint change_queue;
+  uint enter_ticks;
+
+  uint64 handler;
+  int interval;                      // to store the value passed by syscall
+  int now_ticks;                     // how many ticks have passed
+  struct trapframe *alarm_trapframe; // cache the trapframe when timer fires
+  int sigalarm_status;
 };
 
-extern struct proc proc[NPROC];
+int setpriority(int number, int piid);
+
+typedef struct deque_
+{
+  struct proc *n[NPROC];
+  uint end;
+} deque;
+void popfront(deque *a);
+void pushback(deque *a, struct proc *x);
+struct proc *front(deque *a);
+int size(deque *a);
+void delete (deque *a, uint pid);
+#endif

@@ -58,7 +58,7 @@ void test0()
 
 void __attribute__((noinline)) foo(int i, int *j)
 {
-    if ((i % 2500000) == 0)
+    if ((i % 25000000) == 0)
     {
         write(2, ".", 1);
     }
@@ -88,6 +88,7 @@ void test1()
             break;
         foo(i, &j);
     }
+    printf("done\n");
     if (count < 10)
     {
         printf("\ntest1 failed: too few calls to the handler\n");
@@ -99,7 +100,7 @@ void test1()
         // once possible source of errors is that the handler may
         // return somewhere other than where the timer interrupt
         // occurred; another is that that registers may not be
-        // restored correctly, causing i or j or the address ofj
+        // restored correctly, causing i or j or the address of j
         // to get an incorrect value.
         printf("\ntest1 failed: foo() executed fewer times than it was called\n");
     }
@@ -184,10 +185,14 @@ void test3()
     printf("test3 start\n");
 
     asm volatile("lui a5, 0");
-    asm volatile("addi a0, a5, 0xac" : : : "a0");
+    asm volatile("addi a0, a5, 0xac"
+                 :
+                 :
+                 : "a0");
     for (int i = 0; i < 500000000; i++)
         ;
-    asm volatile("mv %0, a0" : "=r"(a0));
+    asm volatile("mv %0, a0"
+                 : "=r"(a0));
 
     if (a0 != 0xac)
         printf("test3 failed: register a0 changed\n");
