@@ -87,21 +87,21 @@ void usertrap(void)
   // give up the CPU if this is a timer interrupt.
   if (which_dev == 2)
   {
-    // if (p->interval)
-    // {
-    //   p->now_ticks++;
-    //   if (!p->sigalarm_status && p->interval > 0 && p->now_ticks >= p->interval)
-    //   {
-    //     p->now_ticks = 0;
-    //     p->sigalarm_status = 1;
+    if (p->interval)
+    {
+      p->now_ticks++;
+      if (!p->sigalarm_status && p->interval > 0 && p->now_ticks >= p->interval)
+      {
+        p->now_ticks = 0;
+        p->sigalarm_status = 1;
 
-    //     // Save trapframe
-    //     p->alarm_trapframe = kalloc();
-    //     memmove(p->alarm_trapframe, p->trapframe, PGSIZE);
+        // Save trapframe
+        p->alarm_trapframe = kalloc();
+        memmove(p->alarm_trapframe, p->trapframe, PGSIZE);
 
-    //     p->trapframe->epc = p->handler;
-    //   }
-    // }
+        p->trapframe->epc = p->handler;
+      }
+    }
 #ifdef MLFQ
     struct proc *p = myproc();
     if (p->change_queue <= 0)
