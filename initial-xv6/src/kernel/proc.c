@@ -129,7 +129,7 @@ found:
   p->pid = allocpid();
   p->state = USED;
   p->level = 0;
-  p->change_queue = 1 << p->level;
+  p->change_queue = TICK1;
   p->in_queue = 0;
   p->enter_ticks = ticks;
 
@@ -574,23 +574,37 @@ void scheduler(void)
     {
       //  --------
       //  FOR GRAPHING
-      // for (int level = 0; level < NMLFQ; level++)
-      // {
-      //   printf("%d %d ",ticks, level);
-      //   for (int z = 0; z < mlfq[level].end; z++)
-      //   {
-      //     printf("%d ", (mlfq[level].n)[z]->pid);
-      //   }
-      //   printf("\n");
-      // }
-      // printf("\n");
+      for (int level = 0; level < NMLFQ; level++)
+      {
+        printf("%d %d ",ticks, level);
+        for (int z = 0; z < mlfq[level].end; z++)
+        {
+          printf("%d ", (mlfq[level].n)[z]->pid);
+        }
+        printf("\n");
+      }
+      printf("\n");
       // --------
 
       // Switch to chosen process.  It is the process's job
       // to release its lock and then reacquire it
       // before jumping back to us.
       acquire(&p->lock);
-      p->change_queue = 1 << p->level;
+      if(p->level == 0) {
+        p->change_queue = TICK1;
+      }
+      else if(p->level == 1) {
+        p->change_queue = TICK2;
+      }
+      else if(p->level == 2) {
+        p->change_queue = TICK3;
+      }
+      else if(p->level == 3) {
+        p->change_queue = TICK4;
+      }
+      else {
+        p->change_queue = 31;
+      }
 
       p->state = RUNNING;
       p->enter_ticks = ticks;
