@@ -113,7 +113,7 @@ void usertrap(void)
       yield();
     }
 #endif
-#if defined RR || defined LBS
+#if defined RR
     yield();
 #endif
   }

@@ -143,8 +143,6 @@ struct proc
   int sigalarm_status;
 };
 
-int setpriority(int number, int piid);
-
 typedef struct deque_
 {
   struct proc *n[NPROC];

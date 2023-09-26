@@ -35,16 +35,6 @@ int main()
             printf("\nProcess %d finished", n);
             exit(0);
         }
-        else
-        {
-#ifdef PBS
-            setpriority(60 - IO + n, pid); // Will only matter for PBS, set lower priority for IO bound processes
-#endif
-#ifdef LBS
-            if (n % 2 == 0)
-                settickets(10);
-#endif
-        }
     }
     for (; n > 0; n--)
     {

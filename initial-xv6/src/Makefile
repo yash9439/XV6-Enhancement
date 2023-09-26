@@ -126,7 +126,6 @@ mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 UPROGS=\
 	$U/_alarmtest\
 	$U/_cat\
-	$U/_cowtest\
 	$U/_echo\
 	$U/_forktest\
 	$U/_grep\
@@ -138,7 +137,6 @@ UPROGS=\
 	$U/_rm\
 	$U/_schedulertest\
 	$U/_schedulertest1\
-	$U/_setpriority\
 	$U/_sh\
 	$U/_stressfs\
 	$U/_time\

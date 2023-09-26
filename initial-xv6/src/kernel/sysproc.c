@@ -109,14 +109,6 @@ sys_uptime(void)
   return xticks;
 }
 
-// system trace
-uint64 sys_trace(void)
-{
-  int tmask;
-  argint(0, &tmask);
-  myproc()->tmask = tmask;
-  return 0;
-}
 
 // system setticket
 int sys_settickets(void)
@@ -159,14 +151,5 @@ uint64 sys_sigreturn(void)
   p->alarm_trapframe = 0;
   p->now_ticks = 0;
   usertrapret();
-  return 0;
-}
-
-uint64 sys_setpriority(void)
-{
-  int number, piid;
-  argint(0, &number);
-  argint(1, &piid);
-  setpriority(number, piid);
   return 0;
 }
