@@ -130,34 +130,6 @@ static uint64 (*syscalls[])(void) = {
     [SYS_waitx] sys_waitx,
 };
 
-char *syscall_name[] = {
-    "",
-    "fork",
-    "exit",
-    "wait",
-    "pipe",
-    "read",
-    "kill",
-    "exec",
-    "fstat",
-    "chdir",
-    "dup",
-    "getpid",
-    "sbrk",
-    "sleep",
-    "uptime",
-    "open",
-    "write",
-    "mknod",
-    "unlink",
-    "link",
-    "mkdir",
-    "close",
-    "sigalarm",
-    "sigreturn",
-    "waitx",
-};
-
 void syscall(void)
 {
   int num;
@@ -168,28 +140,7 @@ void syscall(void)
   {
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
-
-    // int arg0 = p->trapframe->a0;
-    // short argcount = (num == SYS_read || num == SYS_write || num == SYS_mknod || SYS_waitx) ? 3
-    // : ((num == SYS_exec || num == SYS_fstat || num == SYS_open || num == SYS_link || num == SYS_sigalarm) ? 2
-    // : ((num == SYS_wait || num == SYS_pipe || num == SYS_kill || num == SYS_chdir || num == SYS_dup || num == SYS_sbrk || num == SYS_sleep || num == SYS_unlink || num == SYS_mkdir || num == SYS_close) ? 1
-    // : 0));
-
     p->trapframe->a0 = syscalls[num]();
-
-    // if ((p->tmask >> num) & 0x1)
-    // {
-    //   printf("%d: syscall %s (", p->pid, syscall_name[num]);
-
-    //   if (argcount == 1)
-    //     printf("%d ", arg0);
-    //   else if (argcount == 2)
-    //     printf("%d %d ", arg0, p->trapframe->a1);
-    //   else if (argcount == 3)
-    //     printf("%d %d %d ", arg0, p->trapframe->a1, p->trapframe->a2);
-
-    //   printf(") -> %d\n", p->trapframe->a0);
-    // }
   }
   else
   {
