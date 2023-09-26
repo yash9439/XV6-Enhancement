@@ -3208,11 +3208,9 @@ int copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
   {
     va0 = PGROUNDDOWN(dstva);
     8000168e:	7bfd                	lui	s7,0xfffff
-    // }
-
-    // if (pa0 == 0)
-    //   return -1;
-
+    pa0 = walkaddr(pagetable, va0);
+    if (pa0 == 0)
+      return -1;
     n = PGSIZE - (dstva - va0);
     80001690:	6a85                	lui	s5,0x1
     80001692:	a015                	j	800016b6 <copyout+0x4a>

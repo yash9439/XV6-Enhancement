@@ -922,7 +922,7 @@ void killstatus(char *s)
 void preempt(char *s)
 {
 
-#if defined PBS || defined FCFS
+#if defined FCFS
   printf("SKIP\n");
   exit(0);
 #endif
@@ -1023,7 +1023,7 @@ void exitwait(char *s)
 // when it still has live children.
 void reparent(char *s)
 {
-#if defined FCFS || defined PBS
+#if defined FCFS
   exit(0);
 #endif
 
