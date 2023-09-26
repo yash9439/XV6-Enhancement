@@ -79,7 +79,6 @@ int argstr(int n, char *buf, int max)
 extern uint64 sys_fork(void);
 extern uint64 sys_exit(void);
 extern uint64 sys_wait(void);
-extern uint64 sys_waitx(void);
 extern uint64 sys_pipe(void);
 extern uint64 sys_read(void);
 extern uint64 sys_kill(void);
@@ -98,7 +97,7 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
-extern uint64 sys_settickets(void);
+extern uint64 sys_waitx(void);
 extern uint64 sys_sigalarm(void);
 extern uint64 sys_sigreturn(void);
 
@@ -126,7 +125,6 @@ static uint64 (*syscalls[])(void) = {
     [SYS_link] sys_link,
     [SYS_mkdir] sys_mkdir,
     [SYS_close] sys_close,
-    [SYS_settickets] sys_settickets,
     [SYS_sigalarm] sys_sigalarm,
     [SYS_sigreturn] sys_sigreturn,
     [SYS_waitx] sys_waitx,
@@ -155,7 +153,6 @@ char *syscall_name[] = {
     "link",
     "mkdir",
     "close",
-    "settickets",
     "sigalarm",
     "sigreturn",
     "waitx",
@@ -175,7 +172,7 @@ void syscall(void)
     int arg0 = p->trapframe->a0;
     short argcount = (num == SYS_read || num == SYS_write || num == SYS_mknod || SYS_waitx) ? 3
     : ((num == SYS_exec || num == SYS_fstat || num == SYS_open || num == SYS_link || num == SYS_sigalarm) ? 2
-    : ((num == SYS_wait || num == SYS_pipe || num == SYS_kill || num == SYS_chdir || num == SYS_dup || num == SYS_sbrk || num == SYS_sleep || num == SYS_unlink || num == SYS_mkdir || num == SYS_close || num == SYS_settickets) ? 1
+    : ((num == SYS_wait || num == SYS_pipe || num == SYS_kill || num == SYS_chdir || num == SYS_dup || num == SYS_sbrk || num == SYS_sleep || num == SYS_unlink || num == SYS_mkdir || num == SYS_close) ? 1
     : 0));
 
     p->trapframe->a0 = syscalls[num]();

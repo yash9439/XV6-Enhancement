@@ -36,23 +36,6 @@ sys_wait(void)
 }
 
 uint64
-sys_waitx(void)
-{
-  uint64 addr, addr1, addr2;
-  uint wtime, rtime;
-  argaddr(0, &addr);
-  argaddr(1, &addr1); // user virtual memory
-  argaddr(2, &addr2);
-  int ret = waitx(addr, &wtime, &rtime);
-  struct proc *p = myproc();
-  if (copyout(p->pagetable, addr1, (char *)&wtime, sizeof(int)) < 0)
-    return -1;
-  if (copyout(p->pagetable, addr2, (char *)&rtime, sizeof(int)) < 0)
-    return -1;
-  return ret;
-}
-
-uint64
 sys_sbrk(void)
 {
   uint64 addr;
@@ -109,18 +92,6 @@ sys_uptime(void)
   return xticks;
 }
 
-
-// system setticket
-int sys_settickets(void)
-{
-  int number;
-  argint(0, &number);
-  acquire(&(myproc())->lock);
-  myproc()->tickets = number;
-  release(&(myproc())->lock);
-  return 0;
-}
-
 // sigalarm
 uint64 sys_sigalarm(void)
 {
@@ -152,4 +123,21 @@ uint64 sys_sigreturn(void)
   p->now_ticks = 0;
   usertrapret();
   return 0;
+}
+
+uint64
+sys_waitx(void)
+{
+  uint64 addr, addr1, addr2;
+  uint wtime, rtime;
+  argaddr(0, &addr);
+  argaddr(1, &addr1); // user virtual memory
+  argaddr(2, &addr2);
+  int ret = waitx(addr, &wtime, &rtime);
+  struct proc *p = myproc();
+  if (copyout(p->pagetable, addr1, (char *)&wtime, sizeof(int)) < 0)
+    return -1;
+  if (copyout(p->pagetable, addr2, (char *)&rtime, sizeof(int)) < 0)
+    return -1;
+  return ret;
 }

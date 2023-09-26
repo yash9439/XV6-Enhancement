@@ -303,7 +303,6 @@ void uvmfree(pagetable_t pagetable, uint64 sz)
   freewalk(pagetable);
 }
 
-
 // Given a parent process's page table, copy
 // its memory into a child's page table.
 // Copies both the page table and the

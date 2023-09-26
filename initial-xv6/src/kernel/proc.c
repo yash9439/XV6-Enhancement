@@ -131,8 +131,6 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-  p->tickets = 1;
-  p->static_priority = 60;
   p->number_of_times_scheduled = 0;
   p->sleeping_ticks = 0;
   p->running_ticks = 0;
@@ -151,7 +149,6 @@ found:
 
   if (forked_process && p->parent)
   {
-    p->tickets = p->parent->tickets;
     forked_process = 0;
   }
 
@@ -928,7 +925,7 @@ void procdump(void)
       state = states[p->state];
     else
       state = "???";
-    printf("%d %s %s ctime=%d tickets=%d static_prior=%d", p->pid, state, p->name, p->ctime, p->tickets, p->static_priority);
+    printf("%d %s %s ctime=%d", p->pid, state, p->name, p->ctime);
     printf("\n");
   }
 }
