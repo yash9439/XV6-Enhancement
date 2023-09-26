@@ -4,7 +4,6 @@ struct stat;
 int fork(void);
 int exit(int) __attribute__((noreturn));
 int wait(int *);
-
 int pipe(int *);
 int write(int, const void *, int);
 int read(int, void *, int);
@@ -22,8 +21,8 @@ int dup(int);
 int getpid(void);
 char *sbrk(int);
 int sleep(int);
-int waitx(int *, int * /*wtime*/, int * /*rtime*/);
 int uptime(void);
+int waitx(int *, int * /*wtime*/, int * /*rtime*/);
 int sigalarm(int, void (*handler)());
 int sigreturn(void);
 
