@@ -28,7 +28,6 @@ OBJS = \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
-  $K/rand.o \
   $K/queue.o \
   $K/virtio_disk.o
 

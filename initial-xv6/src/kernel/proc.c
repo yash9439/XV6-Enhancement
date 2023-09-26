@@ -5,7 +5,6 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-#include "rand.h"
 #include <stddef.h>
 deque mlfq[NMLFQ];
 
@@ -17,8 +16,6 @@ struct proc *initproc;
 
 int nextpid = 1;
 struct spinlock pid_lock;
-
-int forked_process = 0;
 
 extern void forkret(void);
 static void freeproc(struct proc *p);
@@ -131,11 +128,6 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-  p->number_of_times_scheduled = 0;
-  p->sleeping_ticks = 0;
-  p->running_ticks = 0;
-  p->sleep_start = 0;
-  p->reset_niceness = 1;
   p->level = 0;
   p->change_queue = 1 << p->level;
   p->in_queue = 0;
@@ -146,11 +138,6 @@ found:
   p->interval = 0;
   p->handler = -1;
   p->alarm_trapframe = NULL;
-
-  if (forked_process && p->parent)
-  {
-    forked_process = 0;
-  }
 
   // Allocate a trapframe page.
   if ((p->trapframe = (struct trapframe *)kalloc()) == 0)
@@ -319,9 +306,6 @@ int fork(void)
   struct proc *np;
   struct proc *p = myproc();
 
-  if (p->pid > 1)
-    forked_process = 1;
-
   // Allocate process.
   if ((np = allocproc()) == 0)
   {
@@ -339,9 +323,6 @@ int fork(void)
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
-
-  // trace bits
-  np->tmask = p->tmask;
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
@@ -719,7 +700,6 @@ void sleep(void *chan, struct spinlock *lk)
   release(lk);
 
   // Go to sleep.
-  p->sleep_start = ticks;
   p->chan = chan;
   p->state = SLEEPING;
 
@@ -746,7 +726,6 @@ void wakeup(void *chan)
       acquire(&p->lock);
       if (p->state == SLEEPING && p->chan == chan)
       {
-        p->sleeping_ticks += (ticks - p->sleep_start);
         p->state = RUNNABLE;
       }
       release(&p->lock);
@@ -855,13 +834,12 @@ void procdump(void)
       state = states[p->state];
     else
       state = "???";
-    printf("%d %s %s ctime=%d", p->pid, state, p->name, p->ctime);
+    printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
 }
 
-// Wait for a child process to exit and return its pid.
-// Return -1 if this process has no children.
+// waitx
 int waitx(uint64 addr, uint *wtime, uint *rtime)
 {
   struct proc *np;

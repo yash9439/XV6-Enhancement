@@ -122,12 +122,6 @@ struct proc
   uint ctime;                  // When was the process created
   uint etime;                  // When did the process exited
 
-  uint tmask;
-  uint number_of_times_scheduled;
-  uint sleep_start;
-  uint reset_niceness;
-  uint sleeping_ticks;
-  uint running_ticks;
   uint level;
   uint in_queue;
   uint change_queue;

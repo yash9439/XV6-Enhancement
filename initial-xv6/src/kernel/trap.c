@@ -198,7 +198,6 @@ void clockintr()
   update_time();
   // if (myproc() != 0)
   // {
-  //   myproc()->running_ticks++;
   //   myproc()->change_queue--;
   // }
   wakeup(&ticks);
