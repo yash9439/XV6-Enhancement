@@ -922,8 +922,7 @@ void killstatus(char *s)
 void preempt(char *s)
 {
 
-#if defined FCFS
-  printf("SKIP\n");
+#if defined MLFQ || defined FCFS
   exit(0);
 #endif
 
@@ -1023,7 +1022,7 @@ void exitwait(char *s)
 // when it still has live children.
 void reparent(char *s)
 {
-#if defined FCFS
+#if defined FCFS || defined PBS
   exit(0);
 #endif
 

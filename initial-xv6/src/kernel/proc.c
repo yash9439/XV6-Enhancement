@@ -487,79 +487,85 @@ void scheduler(void)
 
 #if defined FCFS
     struct proc *next_process = 0;
+    int flag_found = 0;
 
+    // First pass: Find the runnable process with the earliest creation time (ctime).
     for (p = proc; p < &proc[NPROC]; p++)
     {
-      acquire(&p->lock);
-      if (p->state == RUNNABLE)
-      {
-        next_process = p;
-        break;
+      if(flag_found == 0) {
+        acquire(&p->lock);
+        if (p->state == RUNNABLE)
+        {
+          next_process = p;
+          flag_found = 1;
+        }
+        release(&p->lock);
       }
-    }
-    for (p++; p < &proc[NPROC]; p++)
-    {
-      acquire(&p->lock);
-      if (p->state == RUNNABLE && next_process->ctime > p->ctime)
-      {
-        next_process = p;
-        continue;
-      }
-    }
-    for (p = proc; p < &proc[NPROC]; p++)
-    {
-      if (p != next_process)
-      {
+      else {
+        acquire(&p->lock);
+        if (p->state == RUNNABLE && next_process->ctime > p->ctime)
+        {
+          next_process = p;
+        }
         release(&p->lock);
       }
     }
+    
     p = next_process;
     if (next_process != 0)
     {
-      // printf("%d ", p->pid);
-      // printf("%d\n", p->pid);
-      // Switch to chosen process.  It is the process's job
-      // to release its lock and then reacquire it
-      // before jumping back to us.
+      acquire(&p->lock);
+      // Context switch to the selected process. The selected process
+      // is responsible for releasing its lock before yielding control
+      // and then reacquiring the lock when it resumes execution.
       p->state = RUNNING;
       c->proc = p;
       swtch(&c->context, &p->context);
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
       c->proc = 0;
       release(&p->lock);
     }
 #elif defined MLFQ
-    for (struct proc *p = proc; p < &proc[NPROC]; p++)
+    // Initialize the flag to 0
+    int flag = 0;
+
+    // Iterate through all processes
+    for (p = proc; p < &proc[NPROC]; p++)
     {
+      // Check if the process is RUNNABLE and has aged enough
       if (p->state == RUNNABLE && ticks - p->enter_ticks >= AGETICK)
       {
+        // If the process is in a queue, remove it
         if (p->in_queue)
         {
           delete (&mlfq[p->level], p->pid);
           p->in_queue = 0;
         }
+        // Decrease the process's level if it's not already at the lowest level
         if (p->level)
           p->level--;
+        // Update the enter_ticks
         p->enter_ticks = ticks;
       }
-    }
-    for (p = proc; p < &proc[NPROC]; p++)
-    {
+
+      // If the process is still RUNNABLE and not in a queue, add it back
       if (p->state == RUNNABLE && !p->in_queue)
       {
         pushback(&mlfq[p->level], p);
         p->in_queue = 1;
       }
     }
-    int flag = 0;
+
+    // Iterate through MLFQ levels
     for (int level = 0; level < NMLFQ; level++)
     {
+      // Process all processes in the current level's queue
       while (size(&mlfq[level]))
       {
         p = front(&mlfq[level]);
         popfront(&mlfq[p->level]);
         p->in_queue = 0;
+
+        // If the process is still RUNNABLE, set the flag and exit
         if (p->state == RUNNABLE)
         {
           p->enter_ticks = ticks;
@@ -567,28 +573,17 @@ void scheduler(void)
           break;
         }
       }
+
+      // If a runnable process is found, break out of the loop
       if (flag)
         break;
     }
+    
     if (p->state == RUNNABLE)
     {
-      //  --------
-      //  FOR GRAPHING
-      for (int level = 0; level < NMLFQ; level++)
-      {
-        printf("%d %d ",ticks, level);
-        for (int z = 0; z < mlfq[level].end; z++)
-        {
-          printf("%d ", (mlfq[level].n)[z]->pid);
-        }
-        printf("\n");
-      }
-      printf("\n");
-      // --------
-
-      // Switch to chosen process.  It is the process's job
-      // to release its lock and then reacquire it
-      // before jumping back to us.
+      // Context switch to the selected process. The selected process
+      // is responsible for releasing its lock before yielding control
+      // and then reacquiring the lock when it resumes execution.
       acquire(&p->lock);
       if(p->level == 0) {
         p->change_queue = TICK1;
@@ -610,9 +605,6 @@ void scheduler(void)
       p->enter_ticks = ticks;
       c->proc = p;
       swtch(&c->context, &p->context);
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
       c->proc = 0;
       release(&p->lock);
     }

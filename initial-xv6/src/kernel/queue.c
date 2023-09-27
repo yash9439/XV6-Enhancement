@@ -8,22 +8,22 @@
 
 void popfront(deque *a)
 {
-    for (int i = 0; i < a->end - 1; i++)
+    a->end -= 1;
+    for (int i = 0; i < a->end; i++)
     {
         a->n[i] = a->n[i + 1];
     }
-    a->end--;
     return;
 }
 void pushback(deque *a, struct proc *x)
 {
     if (a->end == NPROC)
     {
-        panic("Error!");
+        panic("Panic Error");
         return;
     }
     a->n[a->end] = x;
-    a->end++;
+    a->end += 1;
     return;
 }
 struct proc *front(deque *a)
@@ -38,20 +38,17 @@ int size(deque *a)
 {
     return a->end;
 }
-void delete (deque *a, uint pid)
+void delete(deque *a, uint pid)
 {
     int flag = 0;
     for (int i = 0; i < a->end; i++)
     {
         if (pid == a->n[i]->pid)
-        {
             flag = 1;
-        }
+
         if (flag == 1 && i != NPROC)
-        {
             a->n[i] = a->n[i + 1];
-        }
     }
-    a->end--;
+    a->end -= 1;
     return;
 }
